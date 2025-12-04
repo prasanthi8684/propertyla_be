@@ -55,6 +55,30 @@ npm start
 
 The API will be available at `http://localhost:3000`
 
+## Architecture
+
+This application follows a **3-layer architecture** pattern for clean, maintainable code:
+
+- **Controller Layer** - Handles HTTP requests and responses
+- **Service Layer** - Contains all business logic and authentication rules
+- **Repository Layer** - Manages all database operations
+
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed documentation on the application structure, data flow, and design patterns.
+
+## Project Structure
+
+```
+src/
+├── config/database.js           # PostgreSQL connection
+├── controllers/authController.js # HTTP handlers
+├── services/authService.js       # Business logic
+├── repositories/userRepository.js # Database operations
+├── middleware/auth.js            # JWT authentication
+├── routes/authRoutes.js          # API endpoints
+├── types/user.js                 # Type definitions
+└── utils/errors.js               # Error classes
+```
+
 ## API Endpoints
 
 ### 1. Register User
@@ -292,27 +316,37 @@ For validation errors:
 }
 ```
 
-## Project Structure
+## Complete Project Structure
 
 ```
 .
 ├── src/
 │   ├── config/
-│   │   └── database.js           # PostgreSQL connection pool
+│   │   └── database.js                # PostgreSQL connection pool
 │   ├── controllers/
-│   │   └── authController.js     # Authentication logic
+│   │   └── authController.js          # HTTP request handlers
+│   ├── services/
+│   │   └── authService.js             # Business logic & authentication
+│   ├── repositories/
+│   │   └── userRepository.js          # Database operations
 │   ├── middleware/
-│   │   └── auth.js                # JWT authentication middleware
+│   │   └── auth.js                    # JWT verification middleware
 │   ├── routes/
-│   │   └── authRoutes.js          # API route definitions
-│   └── server.js                  # Express server setup
+│   │   └── authRoutes.js              # API endpoint definitions
+│   ├── types/
+│   │   └── user.js                    # Type definitions & classes
+│   ├── utils/
+│   │   └── errors.js                  # Custom error classes
+│   └── server.js                      # Express app setup
 ├── sql/
-│   └── init.sql                  # Database schema initialization
+│   └── init.sql                       # Database schema
 ├── scripts/
-│   └── setup-db.js               # Database setup script
-├── .env                          # Environment variables
+│   └── setup-db.js                    # Database initialization script
+├── .env                               # Environment variables
 ├── .gitignore
 ├── package.json
 ├── README.md
-└── API_EXAMPLES.md
+├── ARCHITECTURE.md                    # Architecture documentation
+├── API_EXAMPLES.md                    # API usage examples
+└── POSTGRES_SETUP.md                  # PostgreSQL setup guide
 ```
