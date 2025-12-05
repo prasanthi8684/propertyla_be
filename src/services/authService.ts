@@ -78,7 +78,7 @@ export const registerUser = async (registrationData: RegistrationData) => {
     userId: newUser.id,
     username: newUser.username,
     email: newUser.email,
-    emailVerified: newUser.email_verified
+    emailVerified: newUser.emailVerified
   };
 };
 
@@ -94,7 +94,7 @@ export const loginUser = async (credentials: LoginCredentials): Promise<AuthToke
     } as ServiceError;
   }
 
-  const passwordMatch = await bcrypt.compare(password, user.password_hash);
+  const passwordMatch = await bcrypt.compare(password, user.passwordHash);
 
   if (!passwordMatch) {
     throw {
@@ -103,7 +103,7 @@ export const loginUser = async (credentials: LoginCredentials): Promise<AuthToke
     } as ServiceError;
   }
 
-  if (!user.email_verified) {
+  if (!user.emailVerified) {
     throw {
       status: 403,
       message: 'Please verify your email before logging in'
@@ -120,10 +120,10 @@ export const loginUser = async (credentials: LoginCredentials): Promise<AuthToke
       id: user.id,
       username: user.username,
       email: user.email,
-      phoneNumber: user.phone_number,
-      emailVerified: user.email_verified,
-      createdAt: user.created_at,
-      updatedAt: user.updated_at
+      phoneNumber: user.phoneNumber,
+      emailVerified: user.emailVerified,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
     }
   };
 };
@@ -145,7 +145,7 @@ export const verifyUserEmailToken = async (token: string) => {
     } as ServiceError;
   }
 
-  if (new Date() > new Date(user.verification_expiry)) {
+  if (user.verificationExpiry && new Date() > new Date(user.verificationExpiry)) {
     throw {
       status: 400,
       message: 'Verification token has expired'
@@ -156,7 +156,7 @@ export const verifyUserEmailToken = async (token: string) => {
 
   return {
     id: updatedUser.id,
-    emailVerified: updatedUser.email_verified
+    emailVerified: updatedUser.emailVerified
   };
 };
 
