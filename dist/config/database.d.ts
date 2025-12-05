@@ -1,6 +1,5 @@
-import pkg from 'pg';
-declare const pool: pkg.Pool;
-export declare const query: (text: string, params?: any[]) => Promise<pkg.QueryResult<any>>;
-export declare const getClient: () => Promise<pkg.PoolClient>;
-export default pool;
+import 'reflect-metadata';
+import { AppDataSource, initializeDatabase } from './ormconfig.js';
+export { AppDataSource, initializeDatabase };
+export default AppDataSource;
 //# sourceMappingURL=database.d.ts.map

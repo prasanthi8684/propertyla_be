@@ -1,53 +1,116 @@
-import { query } from '../config/database.js';
+import { AppDataSource } from '../config/database.js';
+import { User } from '../entities/User.js';
+let userRepository;
+const getUserRepository = () => {
+    if (!userRepository) {
+        userRepository = AppDataSource.getRepository(User);
+    }
+    return userRepository;
+};
 export const createUser = async (userData) => {
-    const { username, email, phoneNumber, passwordHash, verificationToken, verificationExpiry } = userData;
-    const result = await query(`INSERT INTO users (username, email, phone_number, password_hash, verification_token, verification_expiry)
-     VALUES ($1, $2, $3, $4, $5, $6)
-     RETURNING id, username, email, phone_number, email_verified, created_at, updated_at`, [username, email, phoneNumber || null, passwordHash, verificationToken, verificationExpiry]);
-    return result.rows[0];
+    const repository = getUserRepository();
+    const user = repository.create({
+        username: userData.username,
+        email: userData.email,
+        phoneNumber: userData.phoneNumber || null,
+        passwordHash: userData.passwordHash,
+        verificationToken: userData.verificationToken,
+        verificationExpiry: userData.verificationExpiry,
+        emailVerified: false
+    });
+    return await repository.save(user);
 };
 export const findUserByEmail = async (email) => {
-    const result = await query('SELECT id, email, password_hash, email_verified, username, phone_number FROM users WHERE email = $1', [email]);
-    return result.rows[0] || null;
+    const repository = getUserRepository();
+    return await repository.findOne({
+        where: { email },
+        select: ['id', 'email', 'passwordHash', 'emailVerified', 'username', 'phoneNumber', 'createdAt', 'updatedAt']
+    });
 };
 export const findUserById = async (id) => {
-    const result = await query('SELECT id, username, email, phone_number, email_verified, created_at, updated_at FROM users WHERE id = $1', [id]);
-    return result.rows[0] || null;
+    const repository = getUserRepository();
+    return await repository.findOne({
+        where: { id },
+        select: ['id', 'username', 'email', 'phoneNumber', 'emailVerified', 'createdAt', 'updatedAt']
+    });
 };
 export const findUserByUsername = async (username) => {
-    const result = await query('SELECT id, username, email FROM users WHERE username = $1', [username]);
-    return result.rows[0] || null;
+    const repository = getUserRepository();
+    return await repository.findOne({
+        where: { username },
+        select: ['id', 'username', 'email']
+    });
 };
 export const findUserByPhoneNumber = async (phoneNumber) => {
-    const result = await query('SELECT id, phone_number FROM users WHERE phone_number = $1', [phoneNumber]);
-    return result.rows[0] || null;
+    const repository = getUserRepository();
+    return await repository.findOne({
+        where: { phoneNumber },
+        select: ['id', 'phoneNumber']
+    });
 };
 export const checkUserExists = async (username, email, phoneNumber) => {
-    const result = await query(`SELECT id, username, email, phone_number FROM users
-     WHERE username = $1 OR email = $2 OR ($3 IS NOT NULL AND phone_number = $3)`, [username, email, phoneNumber]);
-    if (result.rows.length === 0) {
+    const repository = getUserRepository();
+    const qb = repository.createQueryBuilder('user');
+    qb.where('user.username = :username', { username })
+        .orWhere('user.email = :email', { email });
+    if (phoneNumber) {
+        qb.orWhere('user.phoneNumber = :phoneNumber', { phoneNumber });
+    }
+    const existingUser = await qb.getOne();
+    if (!existingUser) {
         return null;
     }
-    const existingUser = result.rows[0];
     return {
         usernameExists: existingUser.username === username,
         emailExists: existingUser.email === email,
-        phoneExists: phoneNumber ? existingUser.phone_number === phoneNumber : false
+        phoneExists: phoneNumber ? existingUser.phoneNumber === phoneNumber : false
     };
 };
 export const updateLastLogin = async (userId) => {
-    await query('UPDATE users SET last_login = NOW() WHERE id = $1', [userId]);
+    const repository = getUserRepository();
+    await repository.update({ id: userId }, { lastLogin: new Date() });
 };
 export const verifyUserEmail = async (verificationToken) => {
-    const result = await query('SELECT id, verification_expiry FROM users WHERE verification_token = $1', [verificationToken]);
-    return result.rows[0] || null;
+    const repository = getUserRepository();
+    return await repository.findOne({
+        where: { verificationToken },
+        select: ['id', 'verificationExpiry']
+    });
 };
 export const updateUserEmailVerification = async (userId) => {
-    const result = await query('UPDATE users SET email_verified = true, verification_token = NULL, verification_expiry = NULL WHERE id = $1 RETURNING id, email_verified', [userId]);
-    return result.rows[0];
+    const repository = getUserRepository();
+    await repository.update({ id: userId }, {
+        emailVerified: true,
+        verificationToken: null,
+        verificationExpiry: null
+    });
+    const updatedUser = await repository.findOne({
+        where: { id: userId }
+    });
+    if (!updatedUser) {
+        throw new Error('User not found after update');
+    }
+    return updatedUser;
 };
 export const getUsersByEmail = async (email) => {
-    const result = await query('SELECT * FROM users WHERE email = $1', [email]);
-    return result.rows;
+    const repository = getUserRepository();
+    return await repository.find({
+        where: { email }
+    });
+};
+export const deleteUser = async (userId) => {
+    const repository = getUserRepository();
+    await repository.delete({ id: userId });
+};
+export const updateUser = async (userId, updates) => {
+    const repository = getUserRepository();
+    await repository.update({ id: userId }, updates);
+    const updatedUser = await repository.findOne({
+        where: { id: userId }
+    });
+    if (!updatedUser) {
+        throw new Error('User not found after update');
+    }
+    return updatedUser;
 };
 //# sourceMappingURL=userRepository.js.map

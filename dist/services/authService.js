@@ -56,7 +56,7 @@ export const registerUser = async (registrationData) => {
         userId: newUser.id,
         username: newUser.username,
         email: newUser.email,
-        emailVerified: newUser.email_verified
+        emailVerified: newUser.emailVerified
     };
 };
 export const loginUser = async (credentials) => {
@@ -68,14 +68,14 @@ export const loginUser = async (credentials) => {
             message: 'Invalid email or password'
         };
     }
-    const passwordMatch = await bcrypt.compare(password, user.password_hash);
+    const passwordMatch = await bcrypt.compare(password, user.passwordHash);
     if (!passwordMatch) {
         throw {
             status: 401,
             message: 'Invalid email or password'
         };
     }
-    if (!user.email_verified) {
+    if (!user.emailVerified) {
         throw {
             status: 403,
             message: 'Please verify your email before logging in'
@@ -89,10 +89,10 @@ export const loginUser = async (credentials) => {
             id: user.id,
             username: user.username,
             email: user.email,
-            phoneNumber: user.phone_number,
-            emailVerified: user.email_verified,
-            createdAt: user.created_at,
-            updatedAt: user.updated_at
+            phoneNumber: user.phoneNumber,
+            emailVerified: user.emailVerified,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt
         }
     };
 };
@@ -110,7 +110,7 @@ export const verifyUserEmailToken = async (token) => {
             message: 'Invalid verification token'
         };
     }
-    if (new Date() > new Date(user.verification_expiry)) {
+    if (user.verificationExpiry && new Date() > new Date(user.verificationExpiry)) {
         throw {
             status: 400,
             message: 'Verification token has expired'
@@ -119,7 +119,7 @@ export const verifyUserEmailToken = async (token) => {
     const updatedUser = await userRepository.updateUserEmailVerification(user.id);
     return {
         id: updatedUser.id,
-        emailVerified: updatedUser.email_verified
+        emailVerified: updatedUser.emailVerified
     };
 };
 export const getUserProfile = async (userId) => {

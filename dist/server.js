@@ -1,7 +1,9 @@
+import 'reflect-metadata';
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes.js';
+import { initializeDatabase } from './config/database.js';
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -35,9 +37,19 @@ app.use((err, req, res, next) => {
         message: 'Internal server error'
     });
 });
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-    console.log(`API endpoints available at http://localhost:${PORT}/api/auth`);
-});
+const startServer = async () => {
+    try {
+        await initializeDatabase();
+        app.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
+            console.log(`API endpoints available at http://localhost:${PORT}/api/auth`);
+        });
+    }
+    catch (error) {
+        console.error('Failed to start server:', error);
+        process.exit(1);
+    }
+};
+startServer();
 export default app;
 //# sourceMappingURL=server.js.map

@@ -1,14 +1,14 @@
 import { RegistrationData, LoginCredentials, AuthToken, UserProfile } from '../types/user.js';
 export declare const registerUser: (registrationData: RegistrationData) => Promise<{
-    userId: any;
-    username: any;
-    email: any;
-    emailVerified: any;
+    userId: number;
+    username: string;
+    email: string;
+    emailVerified: boolean;
 }>;
 export declare const loginUser: (credentials: LoginCredentials) => Promise<AuthToken>;
 export declare const verifyUserEmailToken: (token: string) => Promise<{
-    id: any;
-    emailVerified: any;
+    id: number;
+    emailVerified: boolean;
 }>;
 export declare const getUserProfile: (userId: number) => Promise<UserProfile>;
 export declare const validateToken: (userId: number) => Promise<UserProfile>;
