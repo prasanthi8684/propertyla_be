@@ -1,30 +1,41 @@
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import crypto from 'crypto';
 import * as userRepository from '../repositories/userRepository.js';
+import { RegistrationData, LoginCredentials, AuthToken, UserProfile } from '../types/user.js';
 
 const BCRYPT_SALT_ROUNDS = 10;
 const VERIFICATION_TOKEN_EXPIRY_HOURS = 24;
 const JWT_EXPIRY = process.env.JWT_EXPIRY || '7d';
-const JWT_SECRET = process.env.JWT_SECRET;
 
-const generateVerificationToken = () => {
+if (!process.env.JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is required');
+}
+
+const JWT_SECRET: string = process.env.JWT_SECRET;
+
+interface ServiceError {
+  status: number;
+  message: string;
+}
+
+const generateVerificationToken = (): string => {
   return crypto.randomBytes(32).toString('hex');
 };
 
-const generateJWTToken = (userId, email) => {
+const generateJWTToken = (userId: number, email: string): string => {
   return jwt.sign(
     { userId, email },
     JWT_SECRET,
-    { expiresIn: JWT_EXPIRY }
+    { expiresIn: JWT_EXPIRY } as SignOptions
   );
 };
 
-const calculateVerificationExpiry = () => {
+const calculateVerificationExpiry = (): Date => {
   return new Date(Date.now() + VERIFICATION_TOKEN_EXPIRY_HOURS * 60 * 60 * 1000);
 };
 
-export const registerUser = async (registrationData) => {
+export const registerUser = async (registrationData: RegistrationData) => {
   const { username, email, phoneNumber, password } = registrationData;
 
   const existingUser = await userRepository.checkUserExists(username, email, phoneNumber);
@@ -34,19 +45,19 @@ export const registerUser = async (registrationData) => {
       throw {
         status: 400,
         message: 'Username already exists'
-      };
+      } as ServiceError;
     }
     if (existingUser.emailExists) {
       throw {
         status: 400,
         message: 'Email already exists'
-      };
+      } as ServiceError;
     }
     if (existingUser.phoneExists) {
       throw {
         status: 400,
         message: 'Phone number already exists'
-      };
+      } as ServiceError;
     }
   }
 
@@ -71,7 +82,7 @@ export const registerUser = async (registrationData) => {
   };
 };
 
-export const loginUser = async (credentials) => {
+export const loginUser = async (credentials: LoginCredentials): Promise<AuthToken> => {
   const { email, password } = credentials;
 
   const user = await userRepository.findUserByEmail(email);
@@ -80,7 +91,7 @@ export const loginUser = async (credentials) => {
     throw {
       status: 401,
       message: 'Invalid email or password'
-    };
+    } as ServiceError;
   }
 
   const passwordMatch = await bcrypt.compare(password, user.password_hash);
@@ -89,14 +100,14 @@ export const loginUser = async (credentials) => {
     throw {
       status: 401,
       message: 'Invalid email or password'
-    };
+    } as ServiceError;
   }
 
   if (!user.email_verified) {
     throw {
       status: 403,
       message: 'Please verify your email before logging in'
-    };
+    } as ServiceError;
   }
 
   await userRepository.updateLastLogin(user.id);
@@ -110,17 +121,19 @@ export const loginUser = async (credentials) => {
       username: user.username,
       email: user.email,
       phoneNumber: user.phone_number,
-      emailVerified: user.email_verified
+      emailVerified: user.email_verified,
+      createdAt: user.created_at,
+      updatedAt: user.updated_at
     }
   };
 };
 
-export const verifyUserEmailToken = async (token) => {
+export const verifyUserEmailToken = async (token: string) => {
   if (!token) {
     throw {
       status: 400,
       message: 'Verification token required'
-    };
+    } as ServiceError;
   }
 
   const user = await userRepository.verifyUserEmail(token);
@@ -129,14 +142,14 @@ export const verifyUserEmailToken = async (token) => {
     throw {
       status: 400,
       message: 'Invalid verification token'
-    };
+    } as ServiceError;
   }
 
   if (new Date() > new Date(user.verification_expiry)) {
     throw {
       status: 400,
       message: 'Verification token has expired'
-    };
+    } as ServiceError;
   }
 
   const updatedUser = await userRepository.updateUserEmailVerification(user.id);
@@ -147,27 +160,27 @@ export const verifyUserEmailToken = async (token) => {
   };
 };
 
-export const getUserProfile = async (userId) => {
+export const getUserProfile = async (userId: number): Promise<UserProfile> => {
   const user = await userRepository.findUserById(userId);
 
   if (!user) {
     throw {
       status: 403,
       message: 'User not found'
-    };
+    } as ServiceError;
   }
 
   return user;
 };
 
-export const validateToken = async (userId) => {
+export const validateToken = async (userId: number): Promise<UserProfile> => {
   const user = await userRepository.findUserById(userId);
 
   if (!user) {
     throw {
       status: 403,
       message: 'Invalid token or user not found'
-    };
+    } as ServiceError;
   }
 
   return user;

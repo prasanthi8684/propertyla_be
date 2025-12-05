@@ -1,6 +1,7 @@
 import { query } from '../config/database.js';
+import { UserRepositoryData, ExistingUserCheck } from '../types/user.js';
 
-export const createUser = async (userData) => {
+export const createUser = async (userData: UserRepositoryData) => {
   const { username, email, phoneNumber, passwordHash, verificationToken, verificationExpiry } = userData;
 
   const result = await query(
@@ -13,7 +14,7 @@ export const createUser = async (userData) => {
   return result.rows[0];
 };
 
-export const findUserByEmail = async (email) => {
+export const findUserByEmail = async (email: string) => {
   const result = await query(
     'SELECT id, email, password_hash, email_verified, username, phone_number FROM users WHERE email = $1',
     [email]
@@ -22,7 +23,7 @@ export const findUserByEmail = async (email) => {
   return result.rows[0] || null;
 };
 
-export const findUserById = async (id) => {
+export const findUserById = async (id: number) => {
   const result = await query(
     'SELECT id, username, email, phone_number, email_verified, created_at, updated_at FROM users WHERE id = $1',
     [id]
@@ -31,7 +32,7 @@ export const findUserById = async (id) => {
   return result.rows[0] || null;
 };
 
-export const findUserByUsername = async (username) => {
+export const findUserByUsername = async (username: string) => {
   const result = await query(
     'SELECT id, username, email FROM users WHERE username = $1',
     [username]
@@ -40,7 +41,7 @@ export const findUserByUsername = async (username) => {
   return result.rows[0] || null;
 };
 
-export const findUserByPhoneNumber = async (phoneNumber) => {
+export const findUserByPhoneNumber = async (phoneNumber: string) => {
   const result = await query(
     'SELECT id, phone_number FROM users WHERE phone_number = $1',
     [phoneNumber]
@@ -49,7 +50,11 @@ export const findUserByPhoneNumber = async (phoneNumber) => {
   return result.rows[0] || null;
 };
 
-export const checkUserExists = async (username, email, phoneNumber) => {
+export const checkUserExists = async (
+  username: string,
+  email: string,
+  phoneNumber?: string
+): Promise<ExistingUserCheck | null> => {
   const result = await query(
     `SELECT id, username, email, phone_number FROM users
      WHERE username = $1 OR email = $2 OR ($3 IS NOT NULL AND phone_number = $3)`,
@@ -64,18 +69,18 @@ export const checkUserExists = async (username, email, phoneNumber) => {
   return {
     usernameExists: existingUser.username === username,
     emailExists: existingUser.email === email,
-    phoneExists: phoneNumber && existingUser.phone_number === phoneNumber
+    phoneExists: phoneNumber ? existingUser.phone_number === phoneNumber : false
   };
 };
 
-export const updateLastLogin = async (userId) => {
+export const updateLastLogin = async (userId: number): Promise<void> => {
   await query(
     'UPDATE users SET last_login = NOW() WHERE id = $1',
     [userId]
   );
 };
 
-export const verifyUserEmail = async (verificationToken) => {
+export const verifyUserEmail = async (verificationToken: string) => {
   const result = await query(
     'SELECT id, verification_expiry FROM users WHERE verification_token = $1',
     [verificationToken]
@@ -84,7 +89,7 @@ export const verifyUserEmail = async (verificationToken) => {
   return result.rows[0] || null;
 };
 
-export const updateUserEmailVerification = async (userId) => {
+export const updateUserEmailVerification = async (userId: number) => {
   const result = await query(
     'UPDATE users SET email_verified = true, verification_token = NULL, verification_expiry = NULL WHERE id = $1 RETURNING id, email_verified',
     [userId]
@@ -93,7 +98,7 @@ export const updateUserEmailVerification = async (userId) => {
   return result.rows[0];
 };
 
-export const getUsersByEmail = async (email) => {
+export const getUsersByEmail = async (email: string) => {
   const result = await query(
     'SELECT * FROM users WHERE email = $1',
     [email]
