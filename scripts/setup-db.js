@@ -22,6 +22,11 @@ async function setupDatabase() {
     await client.connect();
     console.log('Connected successfully!');
 
+    console.log('\n⚠️  Dropping existing tables (if any)...');
+    await client.query('DROP TABLE IF EXISTS properties CASCADE;');
+    await client.query('DROP TABLE IF EXISTS users CASCADE;');
+    console.log('✓ Existing tables dropped');
+
     console.log('\n1. Creating users table...');
     const initSqlPath = path.join(process.cwd(), 'sql', 'init.sql');
     const initSql = fs.readFileSync(initSqlPath, 'utf8');
