@@ -4,7 +4,7 @@ import * as authService from '../services/authService.js';
 import { UserProfile } from '../types/user.js';
 
 interface JWTPayload {
-  userId: number;
+  userId: string;
   email: string;
 }
 

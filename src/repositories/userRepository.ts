@@ -37,7 +37,7 @@ export const findUserByEmail = async (email: string): Promise<User | null> => {
   });
 };
 
-export const findUserById = async (id: number): Promise<User | null> => {
+export const findUserById = async (id: string): Promise<User | null> => {
   const repository = getUserRepository();
 
   return await repository.findOne({
@@ -93,7 +93,7 @@ export const checkUserExists = async (
   };
 };
 
-export const updateLastLogin = async (userId: number): Promise<void> => {
+export const updateLastLogin = async (userId: string): Promise<void> => {
   const repository = getUserRepository();
 
   await repository.update(
@@ -111,7 +111,7 @@ export const verifyUserEmail = async (verificationToken: string): Promise<User |
   });
 };
 
-export const updateUserEmailVerification = async (userId: number): Promise<User> => {
+export const updateUserEmailVerification = async (userId: string): Promise<User> => {
   const repository = getUserRepository();
 
   await repository.update(
@@ -142,13 +142,13 @@ export const getUsersByEmail = async (email: string): Promise<User[]> => {
   });
 };
 
-export const deleteUser = async (userId: number): Promise<void> => {
+export const deleteUser = async (userId: string): Promise<void> => {
   const repository = getUserRepository();
 
   await repository.delete({ id: userId });
 };
 
-export const updateUser = async (userId: number, updates: Partial<User>): Promise<User> => {
+export const updateUser = async (userId: string, updates: Partial<User>): Promise<User> => {
   const repository = getUserRepository();
 
   await repository.update({ id: userId }, updates);

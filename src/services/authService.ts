@@ -23,7 +23,7 @@ const generateVerificationToken = (): string => {
   return crypto.randomBytes(32).toString('hex');
 };
 
-const generateJWTToken = (userId: number, email: string): string => {
+const generateJWTToken = (userId: string, email: string): string => {
   return jwt.sign(
     { userId, email },
     JWT_SECRET,
@@ -160,7 +160,7 @@ export const verifyUserEmailToken = async (token: string) => {
   };
 };
 
-export const getUserProfile = async (userId: number): Promise<UserProfile> => {
+export const getUserProfile = async (userId: string): Promise<UserProfile> => {
   const user = await userRepository.findUserById(userId);
 
   if (!user) {
@@ -173,7 +173,7 @@ export const getUserProfile = async (userId: number): Promise<UserProfile> => {
   return user;
 };
 
-export const validateToken = async (userId: number): Promise<UserProfile> => {
+export const validateToken = async (userId: string): Promise<UserProfile> => {
   const user = await userRepository.findUserById(userId);
 
   if (!user) {

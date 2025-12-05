@@ -10,7 +10,7 @@ export enum UserStatus {
 }
 
 export interface UserData {
-  id: number;
+  id: string;
   username: string;
   email: string;
   phone_number?: string | null;
@@ -24,7 +24,7 @@ export interface UserData {
 }
 
 export interface UserProfile {
-  id: number;
+  id: string;
   username: string;
   email: string;
   phoneNumber?: string | null;
@@ -66,7 +66,7 @@ export interface ExistingUserCheck {
 }
 
 export class User {
-  id: number;
+  id: string;
   username: string;
   email: string;
   phoneNumber?: string | null;
