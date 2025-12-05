@@ -62,6 +62,9 @@ export const getPropertyById = async (req: Request, res: Response): Promise<void
 
 export const getAllProperties = async (req: Request, res: Response): Promise<void> => {
   try {
+    const amenitiesParam = req.query.amenities as string | undefined;
+    const amenitiesArray = amenitiesParam ? amenitiesParam.split(',').map(a => a.trim()) : undefined;
+
     const filters = {
       listingType: req.query.listingType as 'rent' | 'sale' | undefined,
       propertyType: req.query.propertyType as string | undefined,
@@ -78,10 +81,7 @@ export const getAllProperties = async (req: Request, res: Response): Promise<voi
       minBathrooms: req.query.minBathrooms ? parseInt(req.query.minBathrooms as string) : undefined,
       minArea: req.query.minArea ? parseFloat(req.query.minArea as string) : undefined,
       negotiable: req.query.negotiable === 'true' ? true : req.query.negotiable === 'false' ? false : undefined,
-      swimmingPool: req.query.swimmingPool === 'true' ? true : undefined,
-      gymnasium: req.query.gymnasium === 'true' ? true : undefined,
-      coveredParking: req.query.coveredParking === 'true' ? true : undefined,
-      security24h: req.query.security24h === 'true' ? true : undefined
+      amenities: amenitiesArray
     };
 
     const properties = await propertyService.getAllProperties(filters);

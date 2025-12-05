@@ -1,4 +1,5 @@
 import { supabase } from '../config/supabase.js';
+import { PropertyAmenities } from '../types/amenities.js';
 
 export interface Property {
   id: string;
@@ -23,27 +24,7 @@ export interface Property {
   floor_level?: string;
   year_of_build?: number;
   negotiable?: boolean;
-  swimming_pool?: boolean;
-  gymnasium?: boolean;
-  playground?: boolean;
-  bbq_area?: boolean;
-  function_room?: boolean;
-  games_room?: boolean;
-  sky_garden?: boolean;
-  reading_room?: boolean;
-  lounge?: boolean;
-  covered_parking?: boolean;
-  visitor_parking?: boolean;
-  service_lift?: boolean;
-  prayer_room?: boolean;
-  parcel_locker?: boolean;
-  laundry_room?: boolean;
-  cafeteria?: boolean;
-  security_24h?: boolean;
-  cctv_surveillance?: boolean;
-  access_card_system?: boolean;
-  fire_alarm_system?: boolean;
-  emergency_exit?: boolean;
+  amenities: PropertyAmenities;
   images?: string[];
   status: string;
   user_id: string;
@@ -68,10 +49,7 @@ export interface PropertyFilters {
   minBathrooms?: number;
   minArea?: number;
   negotiable?: boolean;
-  swimmingPool?: boolean;
-  gymnasium?: boolean;
-  coveredParking?: boolean;
-  security24h?: boolean;
+  amenities?: string[];
 }
 
 export interface CreatePropertyData {
@@ -96,27 +74,7 @@ export interface CreatePropertyData {
   floor_level?: string;
   year_of_build?: number;
   negotiable?: boolean;
-  swimming_pool?: boolean;
-  gymnasium?: boolean;
-  playground?: boolean;
-  bbq_area?: boolean;
-  function_room?: boolean;
-  games_room?: boolean;
-  sky_garden?: boolean;
-  reading_room?: boolean;
-  lounge?: boolean;
-  covered_parking?: boolean;
-  visitor_parking?: boolean;
-  service_lift?: boolean;
-  prayer_room?: boolean;
-  parcel_locker?: boolean;
-  laundry_room?: boolean;
-  cafeteria?: boolean;
-  security_24h?: boolean;
-  cctv_surveillance?: boolean;
-  access_card_system?: boolean;
-  fire_alarm_system?: boolean;
-  emergency_exit?: boolean;
+  amenities?: PropertyAmenities;
   images?: string[];
   user_id: string;
 }
@@ -217,20 +175,12 @@ export const findAllProperties = async (filters?: PropertyFilters): Promise<Prop
       query = query.eq('negotiable', filters.negotiable);
     }
 
-    if (filters.swimmingPool !== undefined) {
-      query = query.eq('swimming_pool', filters.swimmingPool);
-    }
-
-    if (filters.gymnasium !== undefined) {
-      query = query.eq('gymnasium', filters.gymnasium);
-    }
-
-    if (filters.coveredParking !== undefined) {
-      query = query.eq('covered_parking', filters.coveredParking);
-    }
-
-    if (filters.security24h !== undefined) {
-      query = query.eq('security_24h', filters.security24h);
+    if (filters.amenities && filters.amenities.length > 0) {
+      filters.amenities.forEach(amenity => {
+        query = query.or(
+          `amenities->lifestyle.cs.{${amenity}},amenities->facilities.cs.{${amenity}},amenities->security.cs.{${amenity}}`
+        );
+      });
     }
   }
 

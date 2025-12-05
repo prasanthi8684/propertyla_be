@@ -25,29 +25,11 @@ CREATE TABLE IF NOT EXISTS properties (
   year_of_build INTEGER CHECK (year_of_build >= 1800 AND year_of_build <= 2100),
   negotiable BOOLEAN DEFAULT false,
 
-  swimming_pool BOOLEAN DEFAULT false,
-  gymnasium BOOLEAN DEFAULT false,
-  playground BOOLEAN DEFAULT false,
-  bbq_area BOOLEAN DEFAULT false,
-  function_room BOOLEAN DEFAULT false,
-  games_room BOOLEAN DEFAULT false,
-  sky_garden BOOLEAN DEFAULT false,
-  reading_room BOOLEAN DEFAULT false,
-  lounge BOOLEAN DEFAULT false,
-
-  covered_parking BOOLEAN DEFAULT false,
-  visitor_parking BOOLEAN DEFAULT false,
-  service_lift BOOLEAN DEFAULT false,
-  prayer_room BOOLEAN DEFAULT false,
-  parcel_locker BOOLEAN DEFAULT false,
-  laundry_room BOOLEAN DEFAULT false,
-  cafeteria BOOLEAN DEFAULT false,
-
-  security_24h BOOLEAN DEFAULT false,
-  cctv_surveillance BOOLEAN DEFAULT false,
-  access_card_system BOOLEAN DEFAULT false,
-  fire_alarm_system BOOLEAN DEFAULT false,
-  emergency_exit BOOLEAN DEFAULT false,
+  amenities JSONB DEFAULT '{
+    "lifestyle": [],
+    "facilities": [],
+    "security": []
+  }'::jsonb,
 
   images JSONB,
 
