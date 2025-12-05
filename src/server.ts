@@ -3,6 +3,8 @@ import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes.js';
+import propertyRoutes from './routes/propertyRoutes.js';
+import imageUploadRoutes from './routes/imageUploadRoutes.js';
 import { initializeDatabase } from './config/database.js';
 
 dotenv.config();
@@ -17,18 +19,37 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/', (req: Request, res: Response) => {
   res.json({
     success: true,
-    message: 'Authentication API is running',
-    version: '1.0.0',
+    message: 'Property Listing API with TypeORM is running',
+    version: '2.0.0',
     endpoints: {
-      register: 'POST /api/auth/register',
-      login: 'POST /api/auth/login',
-      profile: 'GET /api/auth/profile (requires auth token)',
-      verifyEmail: 'POST /api/auth/verify-email'
-    }
+      auth: {
+        register: 'POST /api/auth/register',
+        login: 'POST /api/auth/login',
+        profile: 'GET /api/auth/profile (requires auth token)',
+        verifyEmail: 'POST /api/auth/verify-email'
+      },
+      properties: {
+        getAll: 'GET /api/properties (with filters)',
+        getById: 'GET /api/properties/:id',
+        getMyProperties: 'GET /api/properties/my-properties (requires auth)',
+        create: 'POST /api/properties (requires auth)',
+        update: 'PUT /api/properties/:id (requires auth)',
+        delete: 'DELETE /api/properties/:id (requires auth)',
+        search: 'GET /api/properties/search?q=searchTerm'
+      },
+      images: {
+        uploadMultiple: 'POST /api/images/upload-multiple (requires auth, max 10 images)',
+        uploadSingle: 'POST /api/images/upload-single (requires auth)',
+        delete: 'DELETE /api/images/delete (requires auth)'
+      }
+    },
+    note: 'This API uses TypeORM with PostgreSQL for database operations'
   });
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/properties', propertyRoutes);
+app.use('/api/images', imageUploadRoutes);
 
 app.use((req: Request, res: Response) => {
   res.status(404).json({
