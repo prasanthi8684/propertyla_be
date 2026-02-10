@@ -35,7 +35,6 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
     }
 
     const decoded = jwt.verify(token, jwtSecret) as JWTPayload;
-
     const user = await authService.validateToken(decoded.userId);
 
     req.user = user;

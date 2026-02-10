@@ -175,7 +175,7 @@ export const getUserProfile = async (userId: string): Promise<UserProfile> => {
 
 export const validateToken = async (userId: string): Promise<UserProfile> => {
   const user = await userRepository.findUserById(userId);
-
+  console.log(user)
   if (!user) {
     throw {
       status: 403,

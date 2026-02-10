@@ -5,7 +5,8 @@ import { AppError } from '../utils/errors.js';
 
 export const createProperty = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = (req as any).user?.userId;
+    console.log(req.user)
+    const userId = (req as any).user?.id;
 
     if (!userId) {
       res.status(401).json({

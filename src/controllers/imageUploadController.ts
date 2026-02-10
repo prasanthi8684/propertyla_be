@@ -40,6 +40,7 @@ export const uploadImages = async (req: Request, res: Response): Promise<void> =
 
 export const uploadSingleImage = async (req: Request, res: Response): Promise<void> => {
   try {
+    console.log('Request file:', req.file);
     const file = req.file as Express.Multer.File;
 
     if (!file) {

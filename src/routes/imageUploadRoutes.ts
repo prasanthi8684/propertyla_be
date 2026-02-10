@@ -14,8 +14,7 @@ router.post(
 
 router.post(
   '/upload-single',
-  authenticateToken,
-  upload.single('image'),
+  upload.single('images'),
   imageUploadController.uploadSingleImage
 );
 

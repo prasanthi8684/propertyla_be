@@ -1,13 +1,11 @@
 import 'reflect-metadata';
+import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes.js';
 import propertyRoutes from './routes/propertyRoutes.js';
 import imageUploadRoutes from './routes/imageUploadRoutes.js';
 import { initializeDatabase } from './config/database.js';
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,6 +21,7 @@ app.get('/', (req: Request, res: Response) => {
     version: '2.0.0',
     endpoints: {
       auth: {
+         test: 'POST /api/auth/test',
         register: 'POST /api/auth/register',
         login: 'POST /api/auth/login',
         profile: 'GET /api/auth/profile (requires auth token)',
@@ -39,8 +38,9 @@ app.get('/', (req: Request, res: Response) => {
       },
       images: {
         uploadMultiple: 'POST /api/images/upload-multiple (requires auth, max 10 images)',
-        uploadSingle: 'POST /api/images/upload-single (requires auth)',
-        delete: 'DELETE /api/images/delete (requires auth)'
+        uploadSingle: 'POST /api/images/upload-single',
+        delete: 'DELETE /api/images/delete (requires auth)',
+        get: 'GET /api/images/test (requires auth)'
       }
     },
     note: 'This API uses TypeORM with PostgreSQL for database operations'
@@ -52,6 +52,7 @@ app.use('/api/properties', propertyRoutes);
 app.use('/api/images', imageUploadRoutes);
 
 app.use((req: Request, res: Response) => {
+  console.log('Route not found:', req.method, req.originalUrl);
   res.status(404).json({
     success: false,
     message: 'Route not found'
@@ -70,7 +71,7 @@ const startServer = async () => {
   try {
     await initializeDatabase();
 
-    app.listen(PORT, () => {
+    app.listen(PORT,  () => {
       console.log(`Server is running on port ${PORT}`);
       console.log(`API endpoints available at http://localhost:${PORT}/api/auth`);
     });
