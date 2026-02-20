@@ -1,7 +1,7 @@
 import { AppDataSource } from '../config/database.js';
 import { User } from '../entities/User.js';
 import { UserRepositoryData, ExistingUserCheck } from '../types/user.js';
-import { Repository } from 'typeorm';
+import { Repository, DeepPartial } from 'typeorm';
 
 let userRepository: Repository<User>;
 
@@ -12,18 +12,32 @@ const getUserRepository = (): Repository<User> => {
   return userRepository;
 };
 
+export const findValidOTP = async (userId: string, otp: string): Promise<boolean> => {
+  const repository = getUserRepository();
+
+  const user = await repository.findOne({
+    where: { id: userId, otp },
+    select: ['id']
+  });
+
+  return !!user;
+};
+
 export const createUser = async (userData: UserRepositoryData): Promise<User> => {
   const repository = getUserRepository();
 
-  const user = repository.create({
+  const userDataPartial: DeepPartial<User> = {
     username: userData.username,
     email: userData.email,
     phoneNumber: userData.phoneNumber || null,
     passwordHash: userData.passwordHash,
     verificationToken: userData.verificationToken,
     verificationExpiry: userData.verificationExpiry,
-    emailVerified: false
-  });
+    emailVerified: true,
+      otp: userData.otp 
+  };
+
+  const user = repository.create(userDataPartial);
 
   return await repository.save(user);
 };

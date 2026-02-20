@@ -4,6 +4,22 @@ import crypto from 'crypto';
 import * as userRepository from '../repositories/userRepository.js';
 import { RegistrationData, LoginCredentials, AuthToken, UserProfile } from '../types/user.js';
 
+// Local OTP repository stub to avoid missing-module compile error.
+// Replace with the real implementation at ../repositories/otpRepository when available.
+const otpRepository = {
+  // Attempt to find a valid OTP record for the user; return null if not found.
+  findValidOTP: async (userId: string, otp: string) => {
+    // TODO: implement actual lookup against your data store.
+    return null as null | { id: string; userId: string; otp: string; expiresAt: string };
+  },
+
+  // Mark an OTP record as used (no-op for the stub).
+  markAsUsed: async (id: string) => {
+    // TODO: implement actual update in your data store.
+    return;
+  }
+};
+
 const BCRYPT_SALT_ROUNDS = 10;
 const VERIFICATION_TOKEN_EXPIRY_HOURS = 24;
 const JWT_EXPIRY = process.env.JWT_EXPIRY || '7d';
@@ -36,7 +52,7 @@ const calculateVerificationExpiry = (): Date => {
 };
 
 export const registerUser = async (registrationData: RegistrationData) => {
-  const { username, email, phoneNumber, password } = registrationData;
+  const { username, email, phoneNumber, password,otp } = registrationData;
 
   const existingUser = await userRepository.checkUserExists(username, email, phoneNumber);
 
@@ -71,7 +87,8 @@ export const registerUser = async (registrationData: RegistrationData) => {
     phoneNumber,
     passwordHash,
     verificationToken,
-    verificationExpiry
+    verificationExpiry,
+    otp
   });
 
   return {
@@ -128,6 +145,7 @@ export const loginUser = async (credentials: LoginCredentials): Promise<AuthToke
   };
 };
 
+
 export const verifyUserEmailToken = async (token: string) => {
   if (!token) {
     throw {
@@ -175,7 +193,7 @@ export const getUserProfile = async (userId: string): Promise<UserProfile> => {
 
 export const validateToken = async (userId: string): Promise<UserProfile> => {
   const user = await userRepository.findUserById(userId);
-  console.log(user)
+  console.log(user);
   if (!user) {
     throw {
       status: 403,
@@ -184,4 +202,32 @@ export const validateToken = async (userId: string): Promise<UserProfile> => {
   }
 
   return user;
+};
+
+export const verifyOTP = async (userId: string, code: string) => {
+  const user = await userRepository.findUserById(userId);
+  if (!user) {
+    throw {
+      status: 404,
+      message: 'User not found'
+    } as ServiceError;
+  }
+
+ // const otpRecord = await otpRepository.findValidOTP(userId, code);
+    const otpRecord = await userRepository.findValidOTP(userId, code);
+  console.log('OTP record found:', otpRecord);
+  if (!otpRecord) {
+    throw {
+      status: 400,
+      message: 'Invalid or expired OTP'
+    } as ServiceError;
+  }
+
+  const updatedUser = await userRepository.updateUserEmailVerification(userId);
+
+  return {
+    userId: updatedUser.id,
+    email: updatedUser.email,
+    emailVerified: updatedUser.emailVerified
+  };
 };

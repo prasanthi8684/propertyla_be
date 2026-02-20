@@ -38,6 +38,7 @@ export interface RegistrationData {
   email: string;
   phoneNumber?: string;
   password: string;
+  otp:string;
 }
 
 export interface LoginCredentials {
@@ -57,6 +58,7 @@ export interface UserRepositoryData {
   passwordHash: string;
   verificationToken: string;
   verificationExpiry: Date;
+  otp:string;
 }
 
 export interface ExistingUserCheck {

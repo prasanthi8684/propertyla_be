@@ -3,6 +3,7 @@ import { validationResult } from 'express-validator';
 import * as authService from '../services/authService.js';
 
 export const register = async (req: Request, res: Response): Promise<void> => {
+  console.log('Test this is the test route for auth controller');
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -19,7 +20,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       username,
       email,
       phoneNumber: phone_number,
-      password
+      password,
+      otp: '123456'
     });
 
     res.status(201).json({
@@ -46,6 +48,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 };
 
 export const login = async (req: Request, res: Response): Promise<void> => {
+  console.log('Test this is the test route for auth controller');
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -103,7 +106,7 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-export const verifyEmail = async (req: Request, res: Response): Promise<void> => {
+  export const verifyEmail = async (req: Request, res: Response): Promise<void> => {
   try {
     const { token } = req.body;
 
@@ -131,3 +134,34 @@ export const verifyEmail = async (req: Request, res: Response): Promise<void> =>
     });
   }
 };
+ export const verifyOTP =  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { user_id, otp } = req.body;
+ console.log('Received OTP verification request:', { user_id, otp });
+      if (!user_id || !otp) {
+        
+        res.status(400).json({ error: 'User ID and OTP code are required' });
+        return;
+      }
+
+      const result = await authService.verifyOTP(user_id, otp);
+
+      res.status(200).json({
+        message: 'OTP verified successfully. User is now verified.',
+        user_id: result.userId,
+        email: result.email,
+        verified: result.emailVerified
+      });
+      return;
+    } catch (error: any) {
+      console.error('Verification error:', error.message);
+
+      if (error.message === 'User not found' || error.message === 'Invalid or expired OTP') {
+        res.status(400).json({ error: error.message });
+        return;
+      }
+
+      res.status(500).json({ error: 'Internal server error' });
+      return;
+    }
+  }

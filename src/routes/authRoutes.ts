@@ -1,6 +1,6 @@
 import express from 'express';
 import { body } from 'express-validator';
-import { register, login, getProfile, verifyEmail } from '../controllers/authController.js';
+import { register, login, getProfile, verifyEmail,verifyOTP } from '../controllers/authController.js';
 import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -11,10 +11,8 @@ router.post(
     body('username')
       .trim()
       .isLength({ min: 3, max: 30 })
-      .withMessage('Username must be between 3 and 30 characters')
-      .matches(/^[a-zA-Z0-9_]+$/)
-      .withMessage('Username can only contain letters, numbers, and underscores'),
-    body('email')
+      .withMessage('Username must be between 3 and 30 characters'),
+     body('email')
       .trim()
       .isEmail()
       .withMessage('Invalid email address')
@@ -49,7 +47,8 @@ router.post(
 );
 
 router.post('/verify-email', verifyEmail);
-
+// Temporary placeholder for /verify-otp until authController exports verifyOtp
+router.post('/verify-otp', verifyOTP);
 router.get('/profile', authenticateToken, getProfile);
 
 export default router;
