@@ -160,10 +160,11 @@ export const deleteProperty = async (propertyId: string, userId: string): Promis
   await propertyRepository.deleteProperty(propertyId);
 };
 
-export const searchProperties = async (searchTerm: string): Promise<Property[]> => {
-  if (!searchTerm || searchTerm.trim().length === 0) {
-    throw new AppError('Search term is required', 400);
+export const searchProperties = async (filters: { q?: string; type?: string; city?: string; propertyName?: string }): Promise<Property[]> => {
+  const hasFilter = filters.q || filters.type || filters.city || filters.propertyName;
+  if (!hasFilter) {
+    throw new AppError('At least one search filter is required', 400);
   }
 
-  return await propertyRepository.searchProperties(searchTerm);
+  return await propertyRepository.searchProperties(filters);
 };

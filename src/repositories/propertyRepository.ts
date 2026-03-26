@@ -179,18 +179,51 @@ export const deleteProperty = async (id: string): Promise<void> => {
   await propertyRepository.delete(id);
 };
 
-export const searchProperties = async (searchTerm: string): Promise<Property[]> => {
+export interface SearchFilters {
+  q?: string;
+  type?: string;
+  city?: string;
+  propertyName?: string;
+}
+
+export const searchProperties = async (filters: SearchFilters): Promise<Property[]> => {
   const propertyRepository = AppDataSource.getRepository(Property);
   const queryBuilder = propertyRepository.createQueryBuilder('property');
 
-  queryBuilder.where(
-    '(property.title ILIKE :searchTerm OR ' +
-    'property.description ILIKE :searchTerm OR ' +
-    'property.cityName ILIKE :searchTerm OR ' +
-    'property.streetName ILIKE :searchTerm OR ' +
-    'property.landmark ILIKE :searchTerm)',
-    { searchTerm: `%${searchTerm}%` }
-  );
+  const conditions: string[] = [];
+  const params: Record<string, unknown> = {};
+
+  if (filters.q) {
+    conditions.push(
+      '(property.title ILIKE :q OR ' +
+      'property.description ILIKE :q OR ' +
+      'property.cityName ILIKE :q OR ' +
+      'property.streetName ILIKE :q OR ' +
+      'property.landmark ILIKE :q OR ' +
+      'property.propertyName ILIKE :q OR ' +
+      'property.state ILIKE :q)'
+    );
+    params.q = `%${filters.q}%`;
+  }
+
+  if (filters.type) {
+    conditions.push('LOWER(property.listingType) = LOWER(:type)');
+    params.type = filters.type;
+  }
+
+  if (filters.city) {
+    conditions.push('property.cityName ILIKE :city');
+    params.city = `%${filters.city}%`;
+  }
+
+  if (filters.propertyName) {
+    conditions.push('(property.title ILIKE :propertyName OR property.propertyName ILIKE :propertyName)');
+    params.propertyName = `%${filters.propertyName}%`;
+  }
+
+  if (conditions.length > 0) {
+    queryBuilder.where(conditions.join(' AND '), params);
+  }
 
   queryBuilder.orderBy('property.createdAt', 'DESC');
 

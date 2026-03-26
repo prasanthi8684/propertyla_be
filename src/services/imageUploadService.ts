@@ -1,17 +1,21 @@
-import AWS from 'aws-sdk';
 import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 import { Request } from 'express';
 
-const spacesEndpoint = new AWS.Endpoint(process.env.DO_SPACES_ENDPOINT || '');
+// Ensure uploads directory exists on startup
+const uploadDir = path.join(process.cwd(), 'uploads', 'properties');
+fs.mkdirSync(uploadDir, { recursive: true });
 
-const s3 = new AWS.S3({
-  endpoint: spacesEndpoint,
-  accessKeyId: process.env.DO_SPACES_KEY,
-  secretAccessKey: process.env.DO_SPACES_SECRET,
-  region: process.env.DO_SPACES_REGION || 'nyc3'
+const storage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (_req, file, cb) => {
+    const uniqueName = `${Date.now()}-${file.originalname.replace(/\s+/g, '-')}`;
+    cb(null, uniqueName);
+  },
 });
-
-const storage = multer.memoryStorage();
 
 const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
@@ -24,10 +28,10 @@ const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilt
 };
 
 export const upload = multer({
-  storage: storage,
-  fileFilter: fileFilter,
+  storage,
+  fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024
+    fileSize: 5 * 1024 * 1024  // 5MB max
   }
 });
 
@@ -36,66 +40,40 @@ export const uploadSingle = (fieldName: string = 'images') => upload.single(fiel
 export const uploadArray = (fieldName: string = 'images', maxCount: number = 10) => upload.array(fieldName, maxCount);
 export const uploadFields = (fields: multer.Field[]) => upload.fields(fields);
 
+const getServerBase = () => process.env.SERVER_BASE_URL || 'http://localhost:3008';
+
 export const uploadToSpaces = async (
   file: Express.Multer.File,
-  folder: string = 'properties'
+  _folder: string = 'properties'
 ): Promise<string> => {
-  const fileName = `${folder}/${Date.now()}-${file.originalname.replace(/\s+/g, '-')}`;
-
-  const params = {
-    Bucket: process.env.DO_SPACES_BUCKET || '',
-    Key: fileName,
-    Body: file.buffer,
-    ACL: 'public-read',
-    ContentType: file.mimetype
-  };
-
-  try {
-    const data = await s3.upload(params).promise();
-    return data.Location;
-  } catch (error) {
-    console.error('Error uploading to DigitalOcean Spaces:', error);
-    throw new Error('Failed to upload image');
-  }
+  return `${getServerBase()}/uploads/properties/${file.filename}`;
 };
 
 export const uploadMultipleToSpaces = async (
   files: Express.Multer.File[],
-  folder: string = 'properties'
+  _folder: string = 'properties'
 ): Promise<string[]> => {
   if (files.length > 10) {
     throw new Error('Maximum 10 images allowed');
   }
-
-  const uploadPromises = files.map(file => uploadToSpaces(file, folder));
-
-  try {
-    const urls = await Promise.all(uploadPromises);
-    return urls;
-  } catch (error) {
-    throw new Error('Failed to upload one or more images');
-  }
+  return files.map(file => `${getServerBase()}/uploads/properties/${file.filename}`);
 };
 
 export const deleteFromSpaces = async (fileUrl: string): Promise<void> => {
-  const fileName = fileUrl.split('/').slice(-2).join('/');
-
-  const params = {
-    Bucket: process.env.DO_SPACES_BUCKET || '',
-    Key: fileName
-  };
-
   try {
-    await s3.deleteObject(params).promise();
+    const fileName = path.basename(fileUrl);
+    const filePath = path.join(uploadDir, fileName);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
   } catch (error) {
-    console.error('Error deleting from DigitalOcean Spaces:', error);
+    console.error('Error deleting local file:', error);
     throw new Error('Failed to delete image');
   }
 };
 
 export const deleteMultipleFromSpaces = async (fileUrls: string[]): Promise<void> => {
   const deletePromises = fileUrls.map(url => deleteFromSpaces(url));
-
   try {
     await Promise.all(deletePromises);
   } catch (error) {

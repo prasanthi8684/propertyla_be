@@ -2,9 +2,11 @@ import 'reflect-metadata';
 import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
+import path from 'path';
 import authRoutes from './routes/authRoutes.js';
 import propertyRoutes from './routes/propertyRoutes.js';
 import imageUploadRoutes from './routes/imageUploadRoutes.js';
+import uploadsRoutes from './routes/uploadsRoutes.js';
 import { initializeDatabase } from './config/database.js';
 
 const app = express();
@@ -13,6 +15,9 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve uploaded images as static files
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 app.get('/', (req: Request, res: Response) => {
   res.json({
@@ -50,6 +55,7 @@ app.get('/', (req: Request, res: Response) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/properties', propertyRoutes);
 app.use('/api/images', imageUploadRoutes);
+app.use('/api/uploads', uploadsRoutes);
 
 app.use((req: Request, res: Response) => {
   console.log('Route not found:', req.method, req.originalUrl);

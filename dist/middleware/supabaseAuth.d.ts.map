@@ -1,0 +1,1 @@
+{"version":3,"file":"supabaseAuth.d.ts","sourceRoot":"","sources":["../../src/middleware/supabaseAuth.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,OAAO,EAAE,QAAQ,EAAE,YAAY,EAAE,MAAM,SAAS,CAAC;AAG1D,eAAO,MAAM,yBAAyB,GACpC,KAAK,OAAO,EACZ,KAAK,QAAQ,EACb,MAAM,YAAY,KACjB,OAAO,CAAC,IAAI,CAoCd,CAAC"}

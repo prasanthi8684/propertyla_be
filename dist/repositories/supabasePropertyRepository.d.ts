@@ -1,0 +1,85 @@
+import { PropertyAmenities } from '../types/amenities.js';
+export interface Property {
+    id: string;
+    title: string;
+    description: string;
+    listing_type: 'rent' | 'sale';
+    property_type: string;
+    tenure: 'freehold' | 'leasehold';
+    property_name?: string;
+    street_name?: string;
+    city_name?: string;
+    state?: string;
+    county?: string;
+    pincode?: string;
+    landmark?: string;
+    price: number;
+    buildup_area?: number;
+    furnishing?: 'Fully' | 'Partially' | 'Unfurnished';
+    bedrooms?: number;
+    bathrooms?: number;
+    availability?: 'Immediate' | 'Next month' | 'Under Construction';
+    floor_level?: string;
+    year_of_build?: number;
+    negotiable?: boolean;
+    amenities: PropertyAmenities;
+    images?: string[];
+    status: string;
+    user_id: string;
+    created_at: string;
+    updated_at: string;
+}
+export interface PropertyFilters {
+    listingType?: 'rent' | 'sale';
+    propertyType?: string;
+    tenure?: 'freehold' | 'leasehold';
+    furnishing?: 'Fully' | 'Partially' | 'Unfurnished';
+    availability?: 'Immediate' | 'Next month' | 'Under Construction';
+    cityName?: string;
+    state?: string;
+    status?: string;
+    userId?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    minBedrooms?: number;
+    maxBedrooms?: number;
+    minBathrooms?: number;
+    minArea?: number;
+    negotiable?: boolean;
+    amenities?: string[];
+}
+export interface CreatePropertyData {
+    title: string;
+    description: string;
+    listing_type: 'rent' | 'sale';
+    property_type: string;
+    tenure: 'freehold' | 'leasehold';
+    property_name?: string;
+    street_name?: string;
+    city_name?: string;
+    state?: string;
+    county?: string;
+    pincode?: string;
+    landmark?: string;
+    price: number;
+    buildup_area?: number;
+    furnishing?: 'Fully' | 'Partially' | 'Unfurnished';
+    bedrooms?: number;
+    bathrooms?: number;
+    availability?: 'Immediate' | 'Next month' | 'Under Construction';
+    floor_level?: string;
+    year_of_build?: number;
+    negotiable?: boolean;
+    amenities?: PropertyAmenities;
+    images?: string[];
+    user_id: string;
+}
+export declare const createProperty: (propertyData: CreatePropertyData) => Promise<Property>;
+export declare const findPropertyById: (id: string) => Promise<Property | null>;
+export declare const findAllProperties: (filters?: PropertyFilters) => Promise<Property[]>;
+export declare const findPropertiesByUserId: (userId: string) => Promise<Property[]>;
+export declare const updateProperty: (id: string, updates: Partial<CreatePropertyData>) => Promise<Property | null>;
+export declare const deleteProperty: (id: string) => Promise<void>;
+export declare const searchProperties: (searchTerm: string) => Promise<Property[]>;
+export declare const countPropertiesByUser: (userId: string) => Promise<number>;
+//# sourceMappingURL=supabasePropertyRepository.d.ts.map

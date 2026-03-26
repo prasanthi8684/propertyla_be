@@ -1,15 +1,15 @@
 {
   "name": "auth-api",
   "version": "2.0.0",
-  "description": "Property Listing API with Supabase",
-  "main": "dist/supabaseServer.js",
+  "description": "Property Listing API with PostgreSQL and TypeORM",
+  "main": "dist/server.js",
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "start": "npm run build ",
+    "start": "npm run build && node dist/server.js",
     "start:typeorm": "npm run build && node dist/server.js",
-    "dev": "tsc && node --watch dist/supabaseServer.js",
-    "dev:typeorm": "tsc && node --watch dist/server.js",
+    "dev": "npm run build && node --watch dist/server.js",
+    "dev:typeorm": "npm run build && node --watch dist/server.js",
     "setup-db": "node scripts/setup-db.js",
     "test": "node test-api.js"
   },
@@ -22,7 +22,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@supabase/supabase-js": "^2.86.2",
     "aws-sdk": "^2.1692.0",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",

@@ -16,9 +16,43 @@ export const createProperty = async (req: Request, res: Response): Promise<void>
       return;
     }
 
+    const body = req.body;
+
+    // Explicitly parse numeric fields so they arrive as proper types
+    // even if the client sends them as strings.
+    const amenities = body.amenities &&
+      typeof body.amenities === 'object' &&
+      !Array.isArray(body.amenities)
+        ? body.amenities
+        : { lifestyle: [], facilities: [], security: [] };
+
     const propertyData: Partial<Property> = {
-      ...req.body,
-      userId
+      title: body.title,
+      description: body.description,
+      listingType: body.listingType,
+      propertyType: body.propertyType,
+      tenure: body.tenure,
+      propertyName: body.propertyName,
+      streetName: body.streetName,
+      cityName: body.cityName,
+      state: body.state,
+      county: body.county,
+      pincode: body.pincode,
+      landmark: body.landmark,
+      furnishing: body.furnishing,
+      availability: body.availability,
+      floorLevel: body.floorLevel,
+      status: body.status ?? 'active',
+      negotiable: typeof body.negotiable === 'boolean' ? body.negotiable : body.negotiable === true || body.negotiable === 'true',
+      images: Array.isArray(body.images) ? body.images : undefined,
+      amenities,
+      // Parse numeric fields explicitly
+      price: body.price !== undefined ? parseFloat(body.price) : undefined as any,
+      buildupArea: body.buildupArea !== undefined ? parseFloat(body.buildupArea) : undefined,
+      bedrooms: body.bedrooms !== undefined ? parseInt(body.bedrooms, 10) : undefined,
+      bathrooms: body.bathrooms !== undefined ? parseInt(body.bathrooms, 10) : undefined,
+      yearOfBuild: body.yearOfBuild !== undefined ? parseInt(body.yearOfBuild, 10) : undefined,
+      userId,
     };
 
     const property = await propertyService.createProperty(propertyData);
@@ -236,24 +270,30 @@ export const deleteProperty = async (req: Request, res: Response): Promise<void>
 
 export const searchProperties = async (req: Request, res: Response): Promise<void> => {
   try {
-    const searchTerm = req.query.q as string;
+    const q = req.query.q as string | undefined;
+    const type = req.query.type as string | undefined;
+    const city = req.query.city as string | undefined;
+    const propertyName = req.query.propertyName as string | undefined;
 
-    if (!searchTerm) {
+    const filters = { q, type, city, propertyName };
+    const hasFilter = q || type || city || propertyName;
+
+    if (!hasFilter) {
       res.status(400).json({
         success: false,
-        message: 'Search term is required'
+        message: 'At least one filter (q, type, city, or propertyName) is required'
       });
       return;
     }
 
-    const properties = await propertyService.searchProperties(searchTerm);
+    const properties = await propertyService.searchProperties(filters);
 
     res.status(200).json({
       success: true,
       count: properties.length,
       data: properties
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof AppError) {
       res.status(error.status).json({
         success: false,

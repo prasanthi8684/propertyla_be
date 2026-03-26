@@ -3,9 +3,13 @@ import * as imageUploadService from '../services/imageUploadService.js';
 
 export const uploadImages = async (req: Request, res: Response): Promise<void> => {
   try {
+    console.log('Request files:', req.files);
+    console.log('Request body:', req.body);
+    
     const files = req.files as Express.Multer.File[];
 
     if (!files || files.length === 0) {
+      console.log('No files found in request');
       res.status(400).json({
         success: false,
         message: 'No images provided'
