@@ -140,12 +140,79 @@ export const verifyUserEmailToken = async (token) => {
 export const getUserProfile = async (userId) => {
     const user = await userRepository.findUserById(userId);
     if (!user) {
-        throw {
-            status: 403,
-            message: 'User not found'
-        };
+        throw { status: 404, message: 'User not found' };
     }
-    return user;
+    return {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        profileImage: user.profileImage,
+        fullName: user.fullName,
+        bio: user.bio,
+        companyName: user.companyName,
+        icPassport: user.icPassport,
+        designation: user.designation,
+        experienceYears: user.experienceYears,
+        emailVerified: user.emailVerified,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt
+    };
+};
+export const updateUserProfile = async (userId, updates) => {
+    if (updates.username) {
+        const existing = await userRepository.findUserByUsername(updates.username);
+        if (existing && existing.id !== userId) {
+            throw { status: 400, message: 'Username already taken' };
+        }
+    }
+    const updated = await userRepository.updateUser(userId, updates);
+    return {
+        id: updated.id,
+        username: updated.username,
+        email: updated.email,
+        phoneNumber: updated.phoneNumber,
+        fullName: updated.fullName,
+        bio: updated.bio,
+        companyName: updated.companyName,
+        icPassport: updated.icPassport,
+        designation: updated.designation,
+        experienceYears: updated.experienceYears,
+        emailVerified: updated.emailVerified,
+        createdAt: updated.createdAt,
+        updatedAt: updated.updatedAt
+    };
+};
+export const uploadProfileImage = async (userId, imageUrl) => {
+    const updated = await userRepository.updateProfileImage(userId, imageUrl);
+    return {
+        id: updated.id,
+        username: updated.username,
+        email: updated.email,
+        phoneNumber: updated.phoneNumber,
+        profileImage: updated.profileImage,
+        fullName: updated.fullName,
+        bio: updated.bio,
+        companyName: updated.companyName,
+        icPassport: updated.icPassport,
+        designation: updated.designation,
+        experienceYears: updated.experienceYears,
+        emailVerified: updated.emailVerified,
+        createdAt: updated.createdAt,
+        updatedAt: updated.updatedAt
+    };
+};
+export const changePassword = async (userId, oldPassword, newPassword) => {
+    const user = await userRepository.findUserByIdWithPassword(userId);
+    if (!user) {
+        throw { status: 404, message: 'User not found' };
+    }
+    const passwordMatch = await bcrypt.compare(oldPassword, user.passwordHash);
+    if (!passwordMatch) {
+        throw { status: 400, message: 'Old password is incorrect' };
+    }
+    const newPasswordHash = await bcrypt.hash(newPassword, BCRYPT_SALT_ROUNDS);
+    await userRepository.updatePassword(userId, newPasswordHash);
 };
 export const validateToken = async (userId) => {
     const user = await userRepository.findUserById(userId);

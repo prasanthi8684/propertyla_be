@@ -1,6 +1,6 @@
 import express from 'express';
 import { body } from 'express-validator';
-import { register, login, getProfile, verifyEmail, verifyOTP } from '../controllers/authController.js';
+import { register, login, getProfile, updateProfile, changePassword, verifyEmail, verifyOTP } from '../controllers/authController.js';
 import { authenticateToken } from '../middleware/auth.js';
 const router = express.Router();
 router.post('/register', [
@@ -38,5 +38,27 @@ router.post('/verify-email', verifyEmail);
 // Temporary placeholder for /verify-otp until authController exports verifyOtp
 router.post('/verify-otp', verifyOTP);
 router.get('/profile', authenticateToken, getProfile);
+router.put('/profile', authenticateToken, [
+    body('username')
+        .optional()
+        .trim()
+        .isLength({ min: 3, max: 30 })
+        .withMessage('Username must be between 3 and 30 characters'),
+    body('phone_number')
+        .optional({ nullable: true })
+        .trim()
+        .matches(/^\+?[1-9]\d{1,14}$/)
+        .withMessage('Invalid phone number format')
+], updateProfile);
+const changePasswordValidation = [
+    body('oldPassword').optional().notEmpty().withMessage('Old password is required'),
+    body('old_password').optional().notEmpty().withMessage('Old password is required'),
+    body('newPassword').optional().isLength({ min: 8 }).withMessage('New password must be at least 8 characters')
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/).withMessage('Password must contain uppercase, lowercase and number'),
+    body('new_password').optional().isLength({ min: 8 }).withMessage('New password must be at least 8 characters')
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/).withMessage('Password must contain uppercase, lowercase and number'),
+];
+router.put('/change-password', authenticateToken, changePasswordValidation, changePassword);
+router.post('/change-password', authenticateToken, changePasswordValidation, changePassword);
 export default router;
 //# sourceMappingURL=authRoutes.js.map

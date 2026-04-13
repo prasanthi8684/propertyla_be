@@ -3,10 +3,10 @@ import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import path from 'path';
-import authRoutes from './routes/authRoutes.js';
-import propertyRoutes from './routes/propertyRoutes.js';
-import imageUploadRoutes from './routes/imageUploadRoutes.js';
-import uploadsRoutes from './routes/uploadsRoutes.js';
+import authRoutes from './routes/authRoutes';
+import propertyRoutes from './routes/propertyRoutes';
+import imageUploadRoutes from './routes/imageUploadRoutes';
+import uploadsRoutes from './routes/uploadsRoutes';
 import { initializeDatabase } from './config/database.js';
 
 const app = express();

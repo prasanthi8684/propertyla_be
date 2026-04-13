@@ -56,7 +56,7 @@ export const findUserById = async (id: string): Promise<User | null> => {
 
   return await repository.findOne({
     where: { id },
-    select: ['id', 'username', 'email', 'phoneNumber', 'emailVerified', 'createdAt', 'updatedAt']
+    select: ['id', 'username', 'email', 'phoneNumber', 'profileImage', 'fullName', 'bio', 'companyName', 'icPassport', 'designation', 'experienceYears', 'emailVerified', 'createdAt', 'updatedAt']
   });
 };
 
@@ -162,13 +162,26 @@ export const deleteUser = async (userId: string): Promise<void> => {
   await repository.delete({ id: userId });
 };
 
-export const updateUser = async (userId: string, updates: Partial<User>): Promise<User> => {
+export const updateUser = async (
+  userId: string,
+  updates: {
+    username?: string;
+    phoneNumber?: string | null;
+    fullName?: string | null;
+    bio?: string | null;
+    companyName?: string | null;
+    icPassport?: string | null;
+    designation?: string | null;
+    experienceYears?: number | null;
+  }
+): Promise<User> => {
   const repository = getUserRepository();
 
   await repository.update({ id: userId }, updates);
 
   const updatedUser = await repository.findOne({
-    where: { id: userId }
+    where: { id: userId },
+    select: ['id', 'username', 'email', 'phoneNumber', 'fullName', 'bio', 'companyName', 'icPassport', 'designation', 'experienceYears', 'emailVerified', 'createdAt', 'updatedAt']
   });
 
   if (!updatedUser) {
@@ -176,4 +189,43 @@ export const updateUser = async (userId: string, updates: Partial<User>): Promis
   }
 
   return updatedUser;
+};
+
+export const updatePassword = async (userId: string, newPasswordHash: string): Promise<void> => {
+  const repository = getUserRepository();
+  await repository.update({ id: userId }, { passwordHash: newPasswordHash });
+};
+
+export const findUserByIdWithPassword = async (id: string): Promise<User | null> => {
+  const repository = getUserRepository();
+  return await repository.findOne({
+    where: { id },
+    select: ['id', 'passwordHash']
+  });
+};
+
+export const updateProfileImage = async (userId: string, imageUrl: string): Promise<User> => {
+  const repository = getUserRepository();
+
+  await repository.update({ id: userId }, { profileImage: imageUrl });
+
+  const updatedUser = await repository.findOne({
+    where: { id: userId },
+    select: ['id', 'username', 'email', 'phoneNumber', 'profileImage', 'fullName', 'bio', 'companyName', 'icPassport', 'designation', 'experienceYears', 'emailVerified', 'createdAt', 'updatedAt']
+  });
+
+  if (!updatedUser) {
+    throw new Error('User not found after update');
+  }
+
+  return updatedUser;
+};
+
+export const getProfileImage = async (userId: string): Promise<string | null> => {
+  const repository = getUserRepository();
+  const user = await repository.findOne({
+    where: { id: userId },
+    select: ['profileImage']
+  });
+  return user?.profileImage ?? null;
 };

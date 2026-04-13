@@ -12,5 +12,18 @@ export declare const verifyUserEmail: (verificationToken: string) => Promise<Use
 export declare const updateUserEmailVerification: (userId: string) => Promise<User>;
 export declare const getUsersByEmail: (email: string) => Promise<User[]>;
 export declare const deleteUser: (userId: string) => Promise<void>;
-export declare const updateUser: (userId: string, updates: Partial<User>) => Promise<User>;
+export declare const updateUser: (userId: string, updates: {
+    username?: string;
+    phoneNumber?: string | null;
+    fullName?: string | null;
+    bio?: string | null;
+    companyName?: string | null;
+    icPassport?: string | null;
+    designation?: string | null;
+    experienceYears?: number | null;
+}) => Promise<User>;
+export declare const updatePassword: (userId: string, newPasswordHash: string) => Promise<void>;
+export declare const findUserByIdWithPassword: (id: string) => Promise<User | null>;
+export declare const updateProfileImage: (userId: string, imageUrl: string) => Promise<User>;
+export declare const getProfileImage: (userId: string) => Promise<string | null>;
 //# sourceMappingURL=userRepository.d.ts.map

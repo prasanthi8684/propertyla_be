@@ -7,6 +7,7 @@ import authRoutes from './routes/authRoutes.js';
 import propertyRoutes from './routes/propertyRoutes.js';
 import imageUploadRoutes from './routes/imageUploadRoutes.js';
 import uploadsRoutes from './routes/uploadsRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 import { initializeDatabase } from './config/database.js';
 
 const app = express();
@@ -18,6 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Serve uploaded images as static files
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+app.use('/uploads/avatars', express.static(path.join(process.cwd(), 'uploads', 'avatars')));
 
 app.get('/', (req: Request, res: Response) => {
   res.json({
@@ -56,6 +58,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/properties', propertyRoutes);
 app.use('/api/images', imageUploadRoutes);
 app.use('/api/uploads', uploadsRoutes);
+app.use('/api/users', userRoutes);
 
 app.use((req: Request, res: Response) => {
   console.log('Route not found:', req.method, req.originalUrl);

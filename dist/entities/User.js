@@ -15,6 +15,13 @@ let User = class User {
             username: this.username,
             email: this.email,
             phoneNumber: this.phoneNumber,
+            profileImage: this.profileImage,
+            fullName: this.fullName,
+            bio: this.bio,
+            companyName: this.companyName,
+            icPassport: this.icPassport,
+            designation: this.designation,
+            experienceYears: this.experienceYears,
             emailVerified: this.emailVerified,
             createdAt: this.createdAt,
             updatedAt: this.updatedAt
@@ -26,6 +33,13 @@ let User = class User {
             username: this.username,
             email: this.email,
             phoneNumber: this.phoneNumber,
+            profileImage: this.profileImage,
+            fullName: this.fullName,
+            bio: this.bio,
+            companyName: this.companyName,
+            icPassport: this.icPassport,
+            designation: this.designation,
+            experienceYears: this.experienceYears,
             emailVerified: this.emailVerified,
             createdAt: this.createdAt,
             updatedAt: this.updatedAt
@@ -48,6 +62,34 @@ __decorate([
     Column({ type: 'varchar', length: 20, nullable: true, name: 'phone_number' }),
     __metadata("design:type", Object)
 ], User.prototype, "phoneNumber", void 0);
+__decorate([
+    Column({ type: 'varchar', length: 500, nullable: true, name: 'profile_image' }),
+    __metadata("design:type", Object)
+], User.prototype, "profileImage", void 0);
+__decorate([
+    Column({ type: 'varchar', length: 100, nullable: true, name: 'full_name' }),
+    __metadata("design:type", Object)
+], User.prototype, "fullName", void 0);
+__decorate([
+    Column({ type: 'text', nullable: true, name: 'bio' }),
+    __metadata("design:type", Object)
+], User.prototype, "bio", void 0);
+__decorate([
+    Column({ type: 'varchar', length: 100, nullable: true, name: 'company_name' }),
+    __metadata("design:type", Object)
+], User.prototype, "companyName", void 0);
+__decorate([
+    Column({ type: 'varchar', length: 50, nullable: true, name: 'ic_passport' }),
+    __metadata("design:type", Object)
+], User.prototype, "icPassport", void 0);
+__decorate([
+    Column({ type: 'varchar', length: 100, nullable: true, name: 'designation' }),
+    __metadata("design:type", Object)
+], User.prototype, "designation", void 0);
+__decorate([
+    Column({ type: 'int', nullable: true, name: 'experience_years' }),
+    __metadata("design:type", Object)
+], User.prototype, "experienceYears", void 0);
 __decorate([
     Column({ type: 'varchar', length: 255, name: 'password_hash' }),
     __metadata("design:type", String)

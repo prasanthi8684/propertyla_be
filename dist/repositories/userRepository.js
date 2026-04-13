@@ -41,7 +41,7 @@ export const findUserById = async (id) => {
     const repository = getUserRepository();
     return await repository.findOne({
         where: { id },
-        select: ['id', 'username', 'email', 'phoneNumber', 'emailVerified', 'createdAt', 'updatedAt']
+        select: ['id', 'username', 'email', 'phoneNumber', 'profileImage', 'fullName', 'bio', 'companyName', 'icPassport', 'designation', 'experienceYears', 'emailVerified', 'createdAt', 'updatedAt']
     });
 };
 export const findUserByUsername = async (username) => {
@@ -116,11 +116,43 @@ export const updateUser = async (userId, updates) => {
     const repository = getUserRepository();
     await repository.update({ id: userId }, updates);
     const updatedUser = await repository.findOne({
-        where: { id: userId }
+        where: { id: userId },
+        select: ['id', 'username', 'email', 'phoneNumber', 'fullName', 'bio', 'companyName', 'icPassport', 'designation', 'experienceYears', 'emailVerified', 'createdAt', 'updatedAt']
     });
     if (!updatedUser) {
         throw new Error('User not found after update');
     }
     return updatedUser;
+};
+export const updatePassword = async (userId, newPasswordHash) => {
+    const repository = getUserRepository();
+    await repository.update({ id: userId }, { passwordHash: newPasswordHash });
+};
+export const findUserByIdWithPassword = async (id) => {
+    const repository = getUserRepository();
+    return await repository.findOne({
+        where: { id },
+        select: ['id', 'passwordHash']
+    });
+};
+export const updateProfileImage = async (userId, imageUrl) => {
+    const repository = getUserRepository();
+    await repository.update({ id: userId }, { profileImage: imageUrl });
+    const updatedUser = await repository.findOne({
+        where: { id: userId },
+        select: ['id', 'username', 'email', 'phoneNumber', 'profileImage', 'fullName', 'bio', 'companyName', 'icPassport', 'designation', 'experienceYears', 'emailVerified', 'createdAt', 'updatedAt']
+    });
+    if (!updatedUser) {
+        throw new Error('User not found after update');
+    }
+    return updatedUser;
+};
+export const getProfileImage = async (userId) => {
+    const repository = getUserRepository();
+    const user = await repository.findOne({
+        where: { id: userId },
+        select: ['profileImage']
+    });
+    return user?.profileImage ?? null;
 };
 //# sourceMappingURL=userRepository.js.map

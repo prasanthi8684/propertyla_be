@@ -28,9 +28,27 @@ export interface UserProfile {
   username: string;
   email: string;
   phoneNumber?: string | null;
+  profileImage?: string | null;
+  fullName?: string | null;
+  bio?: string | null;
+  companyName?: string | null;
+  icPassport?: string | null;
+  designation?: string | null;
+  experienceYears?: number | null;
   emailVerified: boolean;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface UpdateProfileData {
+  username?: string;
+  phoneNumber?: string | null;
+  fullName?: string | null;
+  bio?: string | null;
+  companyName?: string | null;
+  icPassport?: string | null;
+  designation?: string | null;
+  experienceYears?: number | null;
 }
 
 export interface RegistrationData {
