@@ -20,13 +20,12 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       username,
       email,
       phoneNumber: phone_number,
-      password,
-      otp: '123456'
+      password
     });
 
     res.status(201).json({
       success: true,
-      message: 'Registration successful. Please check your email to verify your account.',
+      message: 'Registration successful. A verification code has been sent to your email.',
       data: result
     });
 

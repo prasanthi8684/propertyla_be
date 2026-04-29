@@ -2,6 +2,8 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import * as userRepository from '../repositories/userRepository.js';
+import { generateOTP } from '../utils/otp.js';
+import { sendOtpEmail } from './emailService.js';
 // Local OTP repository stub to avoid missing-module compile error.
 // Replace with the real implementation at ../repositories/otpRepository when available.
 const otpRepository = {
@@ -33,7 +35,7 @@ const calculateVerificationExpiry = () => {
     return new Date(Date.now() + VERIFICATION_TOKEN_EXPIRY_HOURS * 60 * 60 * 1000);
 };
 export const registerUser = async (registrationData) => {
-    const { username, email, phoneNumber, password, otp } = registrationData;
+    const { username, email, phoneNumber, password } = registrationData;
     const existingUser = await userRepository.checkUserExists(username, email, phoneNumber);
     if (existingUser) {
         if (existingUser.usernameExists) {
@@ -58,6 +60,7 @@ export const registerUser = async (registrationData) => {
     const passwordHash = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
     const verificationToken = generateVerificationToken();
     const verificationExpiry = calculateVerificationExpiry();
+    const otp = generateOTP();
     const newUser = await userRepository.createUser({
         username,
         email,
@@ -67,6 +70,12 @@ export const registerUser = async (registrationData) => {
         verificationExpiry,
         otp
     });
+    try {
+        await sendOtpEmail(newUser.email, newUser.username, otp);
+    }
+    catch (err) {
+        console.error('Failed to send OTP email:', err);
+    }
     return {
         userId: newUser.id,
         username: newUser.username,

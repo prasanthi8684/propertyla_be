@@ -51,7 +51,6 @@ export interface RegistrationData {
     email: string;
     phoneNumber?: string;
     password: string;
-    otp: string;
 }
 export interface LoginCredentials {
     email: string;

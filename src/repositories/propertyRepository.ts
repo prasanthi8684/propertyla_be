@@ -6,7 +6,7 @@ export interface PropertyFilters {
   listingType?: 'rent' | 'sale';
   propertyType?: string;
   tenure?: 'freehold' | 'leasehold';
-  furnishing?: 'Fully Furnished' | 'Partially Furnished' | 'Unfurnished';
+  furnishing?: 'Fully' | 'Partially' | 'Unfurnished';
   availability?: 'Immediate' | 'Next month' | 'Under Construction';
   cityName?: string;
   state?: string;
@@ -29,6 +29,34 @@ export const createProperty = async (propertyData: Partial<Property>): Promise<P
   const propertyRepository = AppDataSource.getRepository(Property);
   const property = propertyRepository.create(propertyData);
   return await propertyRepository.save(property);
+};
+
+export interface DuplicatePropertyCheck {
+  propertyName: string;
+  streetName: string;
+  cityName: string;
+  state: string;
+}
+
+export const findDuplicateProperty = async (
+  match: DuplicatePropertyCheck
+): Promise<Property | null> => {
+  const propertyRepository = AppDataSource.getRepository(Property);
+  return await propertyRepository
+    .createQueryBuilder('property')
+    .where('LOWER(TRIM(property.propertyName)) = LOWER(TRIM(:propertyName))', {
+      propertyName: match.propertyName
+    })
+    .andWhere('LOWER(TRIM(property.streetName)) = LOWER(TRIM(:streetName))', {
+      streetName: match.streetName
+    })
+    .andWhere('LOWER(TRIM(property.cityName)) = LOWER(TRIM(:cityName))', {
+      cityName: match.cityName
+    })
+    .andWhere('LOWER(TRIM(property.state)) = LOWER(TRIM(:state))', {
+      state: match.state
+    })
+    .getOne();
 };
 
 export const findPropertyById = async (id: string): Promise<Property | null> => {

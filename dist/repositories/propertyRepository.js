@@ -139,6 +139,9 @@ export const searchProperties = async (filters) => {
         params.q = `%${filters.q}%`;
     }
     if (filters.type) {
+        if (filters.type == "buy") {
+            filters.type = "sale";
+        }
         conditions.push('LOWER(property.listingType) = LOWER(:type)');
         params.type = filters.type;
     }

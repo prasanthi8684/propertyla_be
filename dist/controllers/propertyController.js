@@ -141,7 +141,7 @@ export const getAllProperties = async (req, res) => {
 };
 export const getUserProperties = async (req, res) => {
     try {
-        const userId = req.user?.userId;
+        const userId = req.user?.id;
         if (!userId) {
             res.status(401).json({
                 success: false,
@@ -165,7 +165,7 @@ export const getUserProperties = async (req, res) => {
 };
 export const updateProperty = async (req, res) => {
     try {
-        const userId = req.user?.userId;
+        const userId = req.user?.id;
         const propertyId = req.params.id;
         if (!userId) {
             res.status(401).json({
@@ -205,7 +205,7 @@ export const updateProperty = async (req, res) => {
 };
 export const deleteProperty = async (req, res) => {
     try {
-        const userId = req.user?.userId;
+        const userId = req.user?.id;
         const propertyId = req.params.id;
         if (!userId) {
             res.status(401).json({
@@ -221,10 +221,11 @@ export const deleteProperty = async (req, res) => {
             });
             return;
         }
-        await propertyService.deleteProperty(propertyId, userId);
+        const property = await propertyService.deleteProperty(propertyId, userId);
         res.status(200).json({
             success: true,
-            message: 'Property deleted successfully'
+            message: 'Property deactivated successfully',
+            data: property
         });
     }
     catch (error) {
@@ -237,7 +238,7 @@ export const deleteProperty = async (req, res) => {
         else {
             res.status(500).json({
                 success: false,
-                message: 'Failed to delete property'
+                message: 'Failed to deactivate property'
             });
         }
     }

@@ -33,8 +33,8 @@ export const createUser = async (userData: UserRepositoryData): Promise<User> =>
     passwordHash: userData.passwordHash,
     verificationToken: userData.verificationToken,
     verificationExpiry: userData.verificationExpiry,
-    emailVerified: true,
-      otp: userData.otp 
+    emailVerified: false,
+    otp: userData.otp
   };
 
   const user = repository.create(userDataPartial);
@@ -132,6 +132,7 @@ export const updateUserEmailVerification = async (userId: string): Promise<User>
     { id: userId },
     {
       emailVerified: true,
+      otp: null,
       verificationToken: null,
       verificationExpiry: null
     }

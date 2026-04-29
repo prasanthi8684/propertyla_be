@@ -24,7 +24,7 @@ export const createUser = async (userData) => {
         passwordHash: userData.passwordHash,
         verificationToken: userData.verificationToken,
         verificationExpiry: userData.verificationExpiry,
-        emailVerified: true,
+        emailVerified: false,
         otp: userData.otp
     };
     const user = repository.create(userDataPartial);
@@ -91,6 +91,7 @@ export const updateUserEmailVerification = async (userId) => {
     const repository = getUserRepository();
     await repository.update({ id: userId }, {
         emailVerified: true,
+        otp: null,
         verificationToken: null,
         verificationExpiry: null
     });

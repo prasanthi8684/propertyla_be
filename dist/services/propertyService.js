@@ -107,7 +107,11 @@ export const deleteProperty = async (propertyId, userId) => {
     if (property.userId !== userId) {
         throw new AppError('You are not authorized to delete this property', 403);
     }
-    await propertyRepository.deleteProperty(propertyId);
+    const updated = await propertyRepository.updateProperty(propertyId, { status: 'deactivate' });
+    if (!updated) {
+        throw new AppError('Failed to deactivate property', 500);
+    }
+    return updated;
 };
 export const searchProperties = async (filters) => {
     const hasFilter = filters.q || filters.type || filters.city || filters.propertyName;
