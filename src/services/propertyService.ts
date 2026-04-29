@@ -146,7 +146,7 @@ export const updateProperty = async (
   return updatedProperty;
 };
 
-export const deleteProperty = async (propertyId: string, userId: string): Promise<void> => {
+export const deleteProperty = async (propertyId: string, userId: string): Promise<Property> => {
   const property = await propertyRepository.findPropertyById(propertyId);
 
   if (!property) {
@@ -157,7 +157,13 @@ export const deleteProperty = async (propertyId: string, userId: string): Promis
     throw new AppError('You are not authorized to delete this property', 403);
   }
 
-  await propertyRepository.deleteProperty(propertyId);
+  const updated = await propertyRepository.updateProperty(propertyId, { status: 'deactivate' });
+
+  if (!updated) {
+    throw new AppError('Failed to deactivate property', 500);
+  }
+
+  return updated;
 };
 
 export const searchProperties = async (filters: { q?: string; type?: string; city?: string; propertyName?: string }): Promise<Property[]> => {

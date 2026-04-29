@@ -6,7 +6,7 @@ export interface PropertyFilters {
   listingType?: 'rent' | 'sale';
   propertyType?: string;
   tenure?: 'freehold' | 'leasehold';
-  furnishing?: 'Fully' | 'Partially' | 'Unfurnished';
+  furnishing?: 'Fully Furnished' | 'Partially Furnished' | 'Unfurnished';
   availability?: 'Immediate' | 'Next month' | 'Under Construction';
   cityName?: string;
   state?: string;
@@ -207,6 +207,9 @@ export const searchProperties = async (filters: SearchFilters): Promise<Property
   }
 
   if (filters.type) {
+    if(filters.type == "buy") {
+      filters.type = "sale";
+    }
     conditions.push('LOWER(property.listingType) = LOWER(:type)');
     params.type = filters.type;
   }
