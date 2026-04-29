@@ -47,8 +47,25 @@ router.post(
 );
 
 router.post('/verify-email', verifyEmail);
-// Temporary placeholder for /verify-otp until authController exports verifyOtp
-router.post('/verify-otp', verifyOTP);
+
+router.post(
+  '/verify-otp',
+  [
+    body('email')
+      .trim()
+      .isEmail()
+      .withMessage('Invalid email address')
+      .normalizeEmail(),
+    body('otp')
+      .isString()
+      .withMessage('OTP is required')
+      .isLength({ min: 6, max: 6 })
+      .withMessage('OTP must be 6 digits')
+      .matches(/^\d{6}$/)
+      .withMessage('OTP must be 6 digits')
+  ],
+  verifyOTP
+);
 router.get('/profile', authenticateToken, getProfile);
 
 router.put(

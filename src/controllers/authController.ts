@@ -197,34 +197,39 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
     });
   }
 };
- export const verifyOTP =  async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { user_id, otp } = req.body;
- console.log('Received OTP verification request:', { user_id, otp });
-      if (!user_id || !otp) {
-        
-        res.status(400).json({ error: 'User ID and OTP code are required' });
-        return;
-      }
-
-      const result = await authService.verifyOTP(user_id, otp);
-
-      res.status(200).json({
-        message: 'OTP verified successfully. User is now verified.',
-        user_id: result.userId,
-        email: result.email,
-        verified: result.emailVerified
+export const verifyOTP = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({
+        success: false,
+        errors: errors.array()
       });
       return;
-    } catch (error: any) {
-      console.error('Verification error:', error.message);
+    }
 
-      if (error.message === 'User not found' || error.message === 'Invalid or expired OTP') {
-        res.status(400).json({ error: error.message });
-        return;
-      }
+    const { email, otp } = req.body;
 
-      res.status(500).json({ error: 'Internal server error' });
+    const result = await authService.verifyOtpByEmail(email, otp);
+
+    res.status(200).json({
+      success: true,
+      message: 'OTP verified successfully. Your account is now active.',
+      data: result
+    });
+  } catch (error: any) {
+    if (error.status) {
+      res.status(error.status).json({
+        success: false,
+        message: error.message
+      });
       return;
     }
+
+    console.error('OTP verification error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
   }
+};

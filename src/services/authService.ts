@@ -6,22 +6,6 @@ import { RegistrationData, LoginCredentials, AuthToken, UserProfile, UpdateProfi
 import { generateOTP } from '../utils/otp.js';
 import { sendOtpEmail } from './emailService.js';
 
-// Local OTP repository stub to avoid missing-module compile error.
-// Replace with the real implementation at ../repositories/otpRepository when available.
-const otpRepository = {
-  // Attempt to find a valid OTP record for the user; return null if not found.
-  findValidOTP: async (userId: string, otp: string) => {
-    // TODO: implement actual lookup against your data store.
-    return null as null | { id: string; userId: string; otp: string; expiresAt: string };
-  },
-
-  // Mark an OTP record as used (no-op for the stub).
-  markAsUsed: async (id: string) => {
-    // TODO: implement actual update in your data store.
-    return;
-  }
-};
-
 const BCRYPT_SALT_ROUNDS = 10;
 const VERIFICATION_TOKEN_EXPIRY_HOURS = 24;
 const JWT_EXPIRY = process.env.JWT_EXPIRY || '7d';
@@ -305,9 +289,7 @@ export const verifyOTP = async (userId: string, code: string) => {
     } as ServiceError;
   }
 
- // const otpRecord = await otpRepository.findValidOTP(userId, code);
-    const otpRecord = await userRepository.findValidOTP(userId, code);
-  console.log('OTP record found:', otpRecord);
+  const otpRecord = await userRepository.findValidOTP(userId, code);
   if (!otpRecord) {
     throw {
       status: 400,
@@ -321,5 +303,50 @@ export const verifyOTP = async (userId: string, code: string) => {
     userId: updatedUser.id,
     email: updatedUser.email,
     emailVerified: updatedUser.emailVerified
+  };
+};
+
+export const verifyOtpByEmail = async (
+  email: string,
+  code: string
+): Promise<AuthToken> => {
+  const user = await userRepository.findUserByEmail(email);
+
+  if (!user) {
+    throw {
+      status: 404,
+      message: 'User not found'
+    } as ServiceError;
+  }
+
+  if (user.emailVerified) {
+    throw {
+      status: 400,
+      message: 'Account is already verified'
+    } as ServiceError;
+  }
+
+  const otpMatch = await userRepository.findValidOTP(user.id, code);
+  if (!otpMatch) {
+    throw {
+      status: 400,
+      message: 'Invalid or expired OTP'
+    } as ServiceError;
+  }
+
+  const updatedUser = await userRepository.updateUserEmailVerification(user.id);
+  const token = generateJWTToken(updatedUser.id, updatedUser.email);
+
+  return {
+    token,
+    user: {
+      id: updatedUser.id,
+      username: updatedUser.username,
+      email: updatedUser.email,
+      phoneNumber: updatedUser.phoneNumber,
+      emailVerified: updatedUser.emailVerified,
+      createdAt: updatedUser.createdAt,
+      updatedAt: updatedUser.updatedAt
+    }
   };
 };
